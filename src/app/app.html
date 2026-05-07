@@ -1,0 +1,144 @@
+<main class="chat-shell">
+  <section class="sidebar" aria-label="Chat room details">
+    <div>
+      <p class="eyebrow">Angular WebSocket Chat</p>
+      <h1>Team room</h1>
+      <p class="summary">
+        A local realtime chat backed by Angular signals and a WebSocket broadcast server.
+      </p>
+    </div>
+
+    <div class="status-card">
+      <span
+        class="status-dot"
+        [class.connected]="connectionState() === 'connected'"
+        [class.away]="isAway()"
+      ></span>
+      <div>
+        <p>{{ connectionState() }}</p>
+        <span>{{ clientCount() }} online · {{ statusLabel() }}</span>
+      </div>
+      @if (connectionState() !== 'connected') {
+        <button type="button" class="secondary-button" (click)="reconnect()">Retry</button>
+      }
+    </div>
+
+    <button type="button" class="away-button" (click)="toggleAway()">
+      {{ isAway() ? 'Set active' : 'Set away' }}
+    </button>
+
+    <label class="field">
+      <span>Display name</span>
+      <input
+        type="text"
+        autocomplete="name"
+        [ngModel]="name()"
+        (ngModelChange)="name.set($event)"
+      />
+    </label>
+
+    <div class="avatar-field">
+      <div class="avatar-preview">
+        @if (avatarUrl()) {
+          <img [src]="avatarUrl()" alt="" />
+        } @else {
+          <span>{{ (name().trim() || 'G').charAt(0).toUpperCase() }}</span>
+        }
+      </div>
+      <label class="avatar-picker">
+        <span>Avatar</span>
+        <span class="avatar-upload-button">Choose image</span>
+        <input type="file" accept="image/*" (change)="updateAvatar($event)" />
+      </label>
+      @if (avatarUrl()) {
+        <button type="button" class="secondary-button" (click)="clearAvatar()">Clear</button>
+      }
+    </div>
+
+    <div class="presence-list" aria-label="Connected users">
+      <h2>Users</h2>
+      @for (user of users(); track user.id) {
+        <div class="presence-user">
+          <span class="user-avatar">
+            @if (user.avatarUrl) {
+              <img [src]="user.avatarUrl" alt="" />
+            } @else {
+              {{ (user.author || 'G').charAt(0).toUpperCase() }}
+            }
+          </span>
+          <span
+            class="presence-color"
+            [class.away]="user.status === 'away'"
+            [class.active]="user.status === 'active'"
+          ></span>
+          <span>{{ user.author }}</span>
+          <strong>{{ user.status }}</strong>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="chat-panel" aria-label="Messages">
+    <header class="chat-header">
+      <div>
+        <h2>Messages</h2>
+        <span>ws://localhost:8080</span>
+      </div>
+    </header>
+
+    <div class="message-list" #messageList>
+      @if (messages().length === 0) {
+        <div class="empty-state">
+          Start the conversation by sending the first message.
+        </div>
+      }
+
+      @for (message of messages(); track message.id) {
+        <article
+          class="message"
+          [class.system]="message.system"
+          [class.inactive]="message.status === 'away'"
+          [style.--message-color]="authorColor(message.author, message.colorIndex)"
+        >
+          <div class="message-row">
+            <span class="message-avatar">
+              @if (message.avatarUrl) {
+                <img [src]="message.avatarUrl" alt="" />
+              } @else {
+                {{ (message.author || 'S').charAt(0).toUpperCase() }}
+              }
+            </span>
+            <div>
+              <div class="message-meta">
+                <strong>{{ message.author }}</strong>
+                @if (message.status === 'away') {
+                  <span class="message-status">Away</span>
+                }
+                <time [dateTime]="message.sentAt">{{ message.sentAt | date: 'shortTime' }}</time>
+              </div>
+              <p>{{ message.text }}</p>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+
+    <form class="composer" (ngSubmit)="sendMessage()">
+      @if (timeoutRemainingSeconds() > 0) {
+        <div class="spam-warning" role="alert">
+          {{ rateLimitMessage() }} Try again in {{ timeoutRemainingSeconds() }}s.
+        </div>
+      }
+      <input
+        type="text"
+        name="message"
+        autocomplete="off"
+        placeholder="Type a message"
+        [disabled]="!canSend()"
+        [ngModel]="draft()"
+        (ngModelChange)="draft.set($event)"
+      />
+      <button type="submit" [disabled]="!draft().trim() || !canSend()">Send</button>
+    </form>
+  </section>
+</main>
