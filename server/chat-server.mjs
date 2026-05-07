@@ -74,7 +74,10 @@ const nextColorIndex = () => {
   return clients.size % maxDistinctColors;
 };
 
-const sanitizeAuthor = (author) => String(author ?? 'Guest').trim().slice(0, 40) || 'Guest';
+const sanitizeAuthor = (author) =>
+  String(author ?? 'Guest')
+    .trim()
+    .slice(0, 40) || 'Guest';
 const sanitizeAvatar = (avatarUrl) => {
   const avatar = String(avatarUrl ?? '');
 
@@ -167,7 +170,9 @@ server.on('connection', (socket) => {
       const status = sanitizeStatus(event.payload.status);
       const currentUser = clients.get(socket);
       const colorIndex = currentUser?.colorIndex ?? 0;
-      const text = String(event.payload.text ?? '').trim().slice(0, 1000);
+      const text = String(event.payload.text ?? '')
+        .trim()
+        .slice(0, 1000);
       const now = Date.now();
 
       if (!text) {

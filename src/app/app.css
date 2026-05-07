@@ -3,9 +3,7 @@
   height: 100vh;
   overflow: hidden;
   color: #172026;
-  background:
-    linear-gradient(135deg, rgba(34, 115, 128, 0.14), transparent 35%),
-    #f4f7f5;
+  background: linear-gradient(135deg, rgba(34, 115, 128, 0.14), transparent 35%), #f4f7f5;
 }
 
 .chat-shell {
