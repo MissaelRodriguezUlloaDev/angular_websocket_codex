@@ -88,9 +88,7 @@
 
     <div class="message-list" #messageList>
       @if (messages().length === 0) {
-        <div class="empty-state">
-          Start the conversation by sending the first message.
-        </div>
+        <div class="empty-state">Start the conversation by sending the first message.</div>
       }
 
       @for (message of messages(); track message.id) {
